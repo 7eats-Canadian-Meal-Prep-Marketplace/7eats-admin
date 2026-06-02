@@ -1,9 +1,11 @@
-import { eq } from "drizzle-orm";
+import { createHash, randomBytes } from "node:crypto";
+import { and, eq, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { cookApplications } from "@/db/schema/applications";
+import { cookApplications, setupTokens } from "@/db/schema/applications";
 import { auth } from "@/lib/auth";
+import { sendSetupEmail } from "@/lib/email";
 
 export async function POST(
   _request: NextRequest,
@@ -31,32 +33,39 @@ export async function POST(
 
   if (application.status !== "approved") {
     return NextResponse.json(
-      { error: "Application is not approved" },
+      { error: "Application must be approved before re-issuing a link." },
       { status: 409 },
     );
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) {
-    return NextResponse.json(
-      { error: "NEXT_PUBLIC_APP_URL not configured" },
-      { status: 500 },
-    );
-  }
+  const rawToken = randomBytes(32).toString("hex");
+  const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
-  const res = await fetch(`${appUrl}/api/internal/reissue-link`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-internal-key": process.env.INTERNAL_API_KEY ?? "",
-    },
-    body: JSON.stringify({ applicationId: id }),
+  // Expire all existing unconsumed tokens then insert the fresh one
+  await db.transaction(async (tx) => {
+    await tx
+      .update(setupTokens)
+      .set({ expiresAt: new Date() })
+      .where(
+        and(eq(setupTokens.applicationId, id), isNull(setupTokens.consumedAt)),
+      );
+    await tx
+      .insert(setupTokens)
+      .values({ applicationId: id, tokenHash, expiresAt });
   });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "Unknown error");
+  try {
+    await sendSetupEmail(
+      application.contactEmail,
+      application.kitchenName,
+      rawToken,
+    );
+  } catch (err) {
+    console.error("[reissue-link] Resend failed:", err);
+    await db.delete(setupTokens).where(eq(setupTokens.tokenHash, tokenHash));
     return NextResponse.json(
-      { error: `Failed to reissue link: ${text}` },
+      { error: "Email delivery failed. New token deleted. Retry when ready." },
       { status: 502 },
     );
   }

@@ -1,10 +1,12 @@
+import { createHash, randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { cookApplications } from "@/db/schema/applications";
+import { cookApplications, setupTokens } from "@/db/schema/applications";
 import { auth } from "@/lib/auth";
+import { sendSetupEmail } from "@/lib/email";
 
 const schema = z.object({
   notes: z.string().optional(),
@@ -39,34 +41,55 @@ export async function POST(
     );
   }
 
-  if (application.status !== "pending_review") {
+  if (application.status === "approved") {
     return NextResponse.json(
-      { error: "Application is not pending review" },
+      { error: "Application is already approved." },
       { status: 409 },
     );
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) {
+  if (application.status !== "pending_review") {
     return NextResponse.json(
-      { error: "NEXT_PUBLIC_APP_URL not configured" },
-      { status: 500 },
+      { error: "Application is not in pending_review status." },
+      { status: 409 },
     );
   }
 
-  const res = await fetch(`${appUrl}/api/internal/issue-link`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-internal-key": process.env.INTERNAL_API_KEY ?? "",
-    },
-    body: JSON.stringify({ applicationId: id }),
+  const rawToken = randomBytes(32).toString("hex");
+  const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+  await db.transaction(async (tx) => {
+    await tx
+      .insert(setupTokens)
+      .values({ applicationId: id, tokenHash, expiresAt });
+    await tx
+      .update(cookApplications)
+      .set({ status: "approved" })
+      .where(eq(cookApplications.id, id));
   });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "Unknown error");
+  try {
+    await sendSetupEmail(
+      application.contactEmail,
+      application.kitchenName,
+      rawToken,
+    );
+  } catch (err) {
+    console.error("[approve] Resend failed:", err);
+    // Compensate: delete the orphaned token and revert status so team can retry
+    await db.transaction(async (tx) => {
+      await tx.delete(setupTokens).where(eq(setupTokens.tokenHash, tokenHash));
+      await tx
+        .update(cookApplications)
+        .set({ status: "pending_review" })
+        .where(eq(cookApplications.id, id));
+    });
     return NextResponse.json(
-      { error: `Failed to issue link: ${text}` },
+      {
+        error:
+          "Email delivery failed. Application reverted to pending_review. Retry when ready.",
+      },
       { status: 502 },
     );
   }
