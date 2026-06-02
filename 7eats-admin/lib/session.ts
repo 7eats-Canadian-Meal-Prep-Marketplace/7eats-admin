@@ -7,7 +7,7 @@ export async function getAdminSession() {
     headers: await headers(),
   });
 
-  if (!session?.user || (session.user as { role?: string }).role !== "admin") {
+  if (!session?.user) {
     redirect("/login");
   }
 

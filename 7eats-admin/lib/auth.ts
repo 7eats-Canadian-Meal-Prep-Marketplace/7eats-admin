@@ -2,11 +2,11 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 import {
-  authAccount,
-  authSession,
-  authUser,
-  authVerification,
-} from "@/db/schema/auth";
+  adminAccount,
+  adminSession,
+  adminUser,
+  adminVerification,
+} from "@/db/schema/admin-auth";
 
 function createAuth() {
   const secret = process.env.BETTER_AUTH_SECRET;
@@ -16,30 +16,16 @@ function createAuth() {
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: {
-        user: authUser,
-        session: authSession,
-        account: authAccount,
-        verification: authVerification,
+        user: adminUser,
+        session: adminSession,
+        account: adminAccount,
+        verification: adminVerification,
       },
     }),
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,
       requireEmailVerification: false,
-    },
-    user: {
-      additionalFields: {
-        role: { type: "string", defaultValue: "client", required: false },
-        status: { type: "string", defaultValue: "active", required: false },
-        firstName: { type: "string", required: false },
-        lastName: { type: "string", required: false },
-        phone: { type: "string", required: false },
-        phoneVerified: {
-          type: "boolean",
-          defaultValue: false,
-          required: false,
-        },
-      },
     },
     secret,
     baseURL: process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3001",

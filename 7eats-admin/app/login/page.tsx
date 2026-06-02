@@ -7,7 +7,8 @@ import styles from "./login.module.css";
 
 export default async function LoginPage() {
   const session = await getSessionOrNull();
-  if (session?.user && (session.user as { role?: string }).role === "admin") {
+
+  if (session?.user) {
     redirect("/admin");
   }
 
