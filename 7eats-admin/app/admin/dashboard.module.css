@@ -1,0 +1,41 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.orderStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.statLink {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.activityGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .activityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tableLink {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+.tableLink:hover {
+  color: var(--red);
+}
