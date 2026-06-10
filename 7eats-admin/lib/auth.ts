@@ -27,6 +27,18 @@ function createAuth() {
       autoSignIn: true,
       requireEmailVerification: false,
     },
+    user: {
+      additionalFields: {
+        // Every admin_user is an admin; surface it on the session so the
+        // role checks in app/api/admin/** pass.
+        role: {
+          type: "string",
+          required: false,
+          defaultValue: "admin",
+          input: false,
+        },
+      },
+    },
     secret,
     baseURL: process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3001",
     trustedOrigins: [
