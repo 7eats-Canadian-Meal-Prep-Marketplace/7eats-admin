@@ -37,10 +37,26 @@ export const NOREPLY_FROM = "noreply@7eats.ca";
 
 // The brand wordmark, served as a PNG (email clients don't render SVG). Built
 // from public/7eats-logo.svg via scripts/make-email-logo.mjs; intrinsic 113x64.
-// Absolute URL so it loads in mail clients; falls back to the prod domain when
-// NEXT_PUBLIC_APP_URL is unset.
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://7eats.ca";
-const LOGO_URL = `${APP_URL}/7eats-logo-email.png`;
+// Email clients must fetch images from the public internet, so local app URLs
+// fall back to the production domain.
+const DEFAULT_EMAIL_ASSET_ORIGIN = "https://www.7eats.ca";
+
+function emailAssetOrigin(): string {
+  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!configuredOrigin) return DEFAULT_EMAIL_ASSET_ORIGIN;
+
+  try {
+    const url = new URL(configuredOrigin);
+    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+      return DEFAULT_EMAIL_ASSET_ORIGIN;
+    }
+    return url.origin;
+  } catch {
+    return DEFAULT_EMAIL_ASSET_ORIGIN;
+  }
+}
+
+const LOGO_URL = `${emailAssetOrigin()}/7eats-logo-email.png`;
 
 // Minimal HTML escaping for untrusted, plain-text values (names, dish titles)
 // that get dropped into a markup context such as the headline.
