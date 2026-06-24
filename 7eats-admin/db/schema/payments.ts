@@ -108,6 +108,14 @@ export const orderPayments = pgTable(
     stripeChargeId: text("stripe_charge_id"),
     stripeTransferId: text("stripe_transfer_id"),
     stripeRefundId: text("stripe_refund_id"),
+    // Platform-funded discount top-up: amount the platform pays the cook from its
+    // own balance so the cook is whole when a platform discount exceeds the fee.
+    platformSubsidyAmount: numeric("platform_subsidy_amount", {
+      precision: 10,
+      scale: 2,
+    }),
+    // The separate Stripe transfer that pays platformSubsidyAmount to the cook.
+    stripeTopupTransferId: text("stripe_topup_transfer_id"),
     authorizedAt: timestamp("authorized_at", { withTimezone: true }),
     heldAt: timestamp("held_at", { withTimezone: true }),
     releasedAt: timestamp("released_at", { withTimezone: true }),
