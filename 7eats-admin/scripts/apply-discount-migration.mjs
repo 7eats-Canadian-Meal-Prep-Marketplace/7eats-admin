@@ -1,10 +1,11 @@
 // One-off: apply db/migrations/0001_platform_discounts.sql to the shared Neon DB.
 // Usage:  node scripts/apply-discount-migration.mjs
 // Reads DATABASE_URL from process.env or from .env.local (no extra deps).
-import { neon } from "@neondatabase/serverless";
+
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { neon } from "@neondatabase/serverless";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -34,9 +35,12 @@ const sqlText = readFileSync(
   "utf8",
 );
 const statements = sqlText
+  .split(/\r?\n/)
+  .filter((line) => !line.trimStart().startsWith("--"))
+  .join("\n")
   .split(/;\s*\n/)
   .map((s) => s.trim())
-  .filter((s) => s.length > 0 && !s.startsWith("--"));
+  .filter((s) => s.length > 0);
 
 const sql = neon(url);
 
@@ -48,7 +52,9 @@ const run = async () => {
       const msg = String(err?.message ?? err);
       // Make re-runs safe: skip objects that already exist.
       if (/already exists/i.test(msg)) {
-        console.error(`SKIP (exists): ${stmt.slice(0, 60).replace(/\s+/g, " ")}…`);
+        console.error(
+          `SKIP (exists): ${stmt.slice(0, 60).replace(/\s+/g, " ")}…`,
+        );
         continue;
       }
       console.error(`FAILED: ${stmt.slice(0, 80).replace(/\s+/g, " ")}…`);
@@ -65,7 +71,9 @@ const run = async () => {
   const ordersCols = await sql.query(
     "SELECT column_name FROM information_schema.columns WHERE table_name = 'orders' AND column_name LIKE 'platform_discount%' ORDER BY 1",
   );
-  console.error(`OK — orders new columns: ${ordersCols.map((c) => c.column_name).join(", ")}`);
+  console.error(
+    `OK — orders new columns: ${ordersCols.map((c) => c.column_name).join(", ")}`,
+  );
 };
 
 run();

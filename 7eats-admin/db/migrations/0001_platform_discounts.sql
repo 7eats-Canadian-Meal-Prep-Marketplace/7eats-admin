@@ -14,7 +14,7 @@ CREATE TABLE platform_discounts (
   starts_at timestamptz,
   ends_at timestamptz,
   is_active boolean NOT NULL DEFAULT true,
-  created_by text REFERENCES auth_user (id) ON DELETE SET NULL,
+  created_by text REFERENCES "user" (id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT platform_discounts_value_positive CHECK (value > 0),
