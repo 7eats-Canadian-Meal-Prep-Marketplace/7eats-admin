@@ -89,10 +89,18 @@ export function CookDetailTabs({
     router.refresh();
   }
 
+  function handleFeeChange(value: string) {
+    // Silently block anything that isn't a number with up to 2 decimals.
+    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+      setFeeValue(value);
+      setError("");
+    }
+  }
+
   async function handleFeeOverride() {
     const pct = Number(feeValue);
-    if (Number.isNaN(pct) || pct <= 0 || pct > 100) {
-      setError("Fee must be between 0.01 and 100");
+    if (feeValue === "" || Number.isNaN(pct) || pct < 0.5 || pct > 7.5) {
+      setError("Fee must be between 0.5% and 7.5%");
       return;
     }
     setLoading(true);
@@ -282,17 +290,24 @@ export function CookDetailTabs({
               </label>
               <input
                 id="fee-pct"
-                type="number"
+                type="text"
+                inputMode="decimal"
                 className={`form-input ${error ? "is-error" : ""}`}
                 value={feeValue}
-                onChange={(e) => {
-                  setFeeValue(e.target.value);
-                  setError("");
-                }}
-                min="0.01"
-                max="100"
-                step="0.5"
+                onChange={(e) => handleFeeChange(e.target.value)}
+                placeholder="0.5 – 7.5"
+                aria-describedby="fee-pct-hint"
               />
+              <p
+                id="fee-pct-hint"
+                style={{
+                  fontSize: 12,
+                  color: "var(--grey-700)",
+                  marginTop: 6,
+                }}
+              >
+                Allowed range: 0.5% to 7.5% (up to 2 decimal places).
+              </p>
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="fee-notes">

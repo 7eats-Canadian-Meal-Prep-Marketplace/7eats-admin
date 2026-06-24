@@ -96,3 +96,8 @@ export const notificationEntityTypeEnum = pgEnum("notification_entity_type", [
   "order_cancelled",
   "review",
 ]);
+
+export const platformDiscountType = pgEnum("platform_discount_type", [
+  "percentage",
+  "fixed",
+]);

@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Star,
+  Tag,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/listings", label: "Listings", icon: List },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/admin/discounts", label: "Discounts", icon: Tag },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart2 },
 ] as const;

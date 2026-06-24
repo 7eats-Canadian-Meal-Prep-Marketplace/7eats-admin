@@ -3,6 +3,7 @@ export * from "./applications";
 export * from "./auth";
 export * from "./cook_pickup_windows";
 export * from "./cooks";
+export * from "./discounts";
 export * from "./dishes";
 export * from "./enums";
 export * from "./listings";
