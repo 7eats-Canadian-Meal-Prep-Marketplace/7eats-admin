@@ -1,8 +1,11 @@
 "use client";
 
 import { Tag } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { discountStatus } from "@/lib/discounts/status";
+import { DiscountForm } from "./DiscountForm";
 import styles from "./discounts.module.css";
 
 export type DiscountRow = {
@@ -45,8 +48,25 @@ export function DiscountsClient({
 }: {
   initialDiscounts: DiscountRow[];
 }) {
+  const router = useRouter();
   const [discounts] = useState<DiscountRow[]>(initialDiscounts);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<DiscountRow | null>(null);
   const now = new Date();
+
+  async function handleDelete(d: DiscountRow) {
+    if (!confirm(`Delete "${d.name}"? This cannot be undone.`)) return;
+    const res = await fetch(`/api/admin/discounts/${d.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      toast.error((j as { error?: string }).error ?? "Could not delete");
+      return;
+    }
+    toast.success("Discount deleted");
+    router.refresh();
+  }
 
   return (
     <div className={styles.page}>
@@ -59,8 +79,14 @@ export function DiscountsClient({
             Platform-funded promotions applied automatically at checkout.
           </p>
         </div>
-        {/* A6 replaces this button with the create-form trigger. */}
-        <button type="button" className={styles.newBtn}>
+        <button
+          type="button"
+          className={styles.newBtn}
+          onClick={() => {
+            setEditing(null);
+            setFormOpen(true);
+          }}
+        >
           New discount
         </button>
       </header>
@@ -77,6 +103,7 @@ export function DiscountsClient({
               <th>Per user</th>
               <th>Redemptions</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -106,11 +133,40 @@ export function DiscountsClient({
                       {status}
                     </span>
                   </td>
+                  <td>
+                    <div className={styles.actionsCell}>
+                      <button
+                        type="button"
+                        className={styles.editBtn}
+                        onClick={() => {
+                          setEditing(d);
+                          setFormOpen(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.deleteBtn}
+                        onClick={() => handleDelete(d)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+      )}
+
+      {formOpen && (
+        <DiscountForm
+          existing={editing}
+          onClose={() => setFormOpen(false)}
+          onSaved={() => router.refresh()}
+        />
       )}
     </div>
   );
