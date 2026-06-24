@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  index,
   integer,
   numeric,
   pgPolicy,
@@ -14,6 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { authUser } from "./auth";
 import { cookProfiles } from "./cooks";
+import { platformDiscounts } from "./discounts";
 import { dishes } from "./dishes";
 import { lateCancelFeeTypeEnum, orderStatus } from "./enums";
 import { listingPromotions, listings } from "./listings";
@@ -45,6 +47,15 @@ export const orders = pgTable(
     }),
     // Dollar amount discounted; null when no promotion applied
     discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }),
+    // Platform-funded discount applied at checkout (null = none). See discounts.ts.
+    platformDiscountId: uuid("platform_discount_id").references(
+      () => platformDiscounts.id,
+      { onDelete: "set null" },
+    ),
+    platformDiscountAmount: numeric("platform_discount_amount", {
+      precision: 10,
+      scale: 2,
+    }),
     // total_price = unit_price * quantity - COALESCE(discount_amount, 0)
     totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("CAD"),
@@ -87,6 +98,10 @@ export const orders = pgTable(
     uniqueIndex("orders_subscription_period_uidx").on(
       t.subscriptionId,
       t.pickupAt,
+    ),
+    index("orders_platform_discount_client_idx").on(
+      t.platformDiscountId,
+      t.clientId,
     ),
     check("orders_quantity_positive", sql`${t.quantity} >= 1`),
     check("orders_unit_price_positive", sql`${t.unitPrice} > 0`),
