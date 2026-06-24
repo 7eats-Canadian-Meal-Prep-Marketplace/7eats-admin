@@ -1,0 +1,17 @@
+.page { display: flex; flex-direction: column; gap: 1.5rem; }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700; }
+.subtitle { color: var(--muted, #6b7280); margin-top: 0.25rem; }
+.newBtn { background: #111827; color: #fff; border: none; border-radius: 0.5rem; padding: 0.6rem 1rem; font-weight: 600; cursor: pointer; }
+.newBtn:hover { background: #1f2937; }
+.empty { color: var(--muted, #6b7280); }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+.table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; }
+.name { font-weight: 600; }
+.desc { color: #6b7280; font-size: 0.85rem; margin-top: 0.2rem; max-width: 32ch; }
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
+.active { background: #dcfce7; color: #166534; }
+.scheduled { background: #dbeafe; color: #1e40af; }
+.expired { background: #f3f4f6; color: #4b5563; }
+.inactive { background: #fee2e2; color: #991b1b; }
