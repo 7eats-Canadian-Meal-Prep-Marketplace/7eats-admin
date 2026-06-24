@@ -49,7 +49,6 @@ export function DiscountsClient({
   initialDiscounts: DiscountRow[];
 }) {
   const router = useRouter();
-  const [discounts] = useState<DiscountRow[]>(initialDiscounts);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<DiscountRow | null>(null);
   const now = new Date();
@@ -91,7 +90,7 @@ export function DiscountsClient({
         </button>
       </header>
 
-      {discounts.length === 0 ? (
+      {initialDiscounts.length === 0 ? (
         <p className={styles.empty}>No discounts yet.</p>
       ) : (
         <table className={styles.table}>
@@ -107,7 +106,7 @@ export function DiscountsClient({
             </tr>
           </thead>
           <tbody>
-            {discounts.map((d) => {
+            {initialDiscounts.map((d) => {
               const status = discountStatus(
                 {
                   isActive: d.isActive,

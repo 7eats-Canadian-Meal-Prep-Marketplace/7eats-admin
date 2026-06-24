@@ -32,6 +32,18 @@
 .newBtn:hover {
   background: #1f2937;
 }
+.saveBtn {
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.saveBtn:hover {
+  background: #1f2937;
+}
 .empty {
   color: var(--muted, #6b7280);
 }

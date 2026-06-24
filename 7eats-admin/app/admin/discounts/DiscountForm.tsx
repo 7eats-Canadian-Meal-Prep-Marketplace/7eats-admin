@@ -201,7 +201,7 @@ export function DiscountForm({ onClose, onSaved, existing }: Props) {
           <button type="button" onClick={onClose} className={styles.cancelBtn}>
             Cancel
           </button>
-          <button type="submit" disabled={saving} className={styles.newBtn}>
+          <button type="submit" disabled={saving} className={styles.saveBtn}>
             {saving ? "Saving…" : existing ? "Save changes" : "Create discount"}
           </button>
         </div>
