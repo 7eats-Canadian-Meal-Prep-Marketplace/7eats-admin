@@ -111,12 +111,39 @@ After subtotal `S` (post dish-promo) is known, inside the placement transaction:
 2. Compute each discount's dollar value:
    - `fixed`: `min(value, S)`
    - `percentage`: `min(S * value / 100, COALESCE(max_discount_amount, ∞), S)`
-3. Keep only discounts where the user's non-cancelled redemption count `< per_user_limit`.
-4. Pick the **largest** dollar value (`P`). Tie-break: most recently created.
+3. Order candidates by dollar value desc (tie-break: most recently created).
+4. Walk the ordered candidates and select the first one the user is still entitled to,
+   under an **advisory lock** (see §4.1):
+   - Acquire `pg_advisory_xact_lock(hashtext('pd:' || discount_id || ':' || client_id))`.
+   - Re-count the user's non-cancelled orders referencing that discount.
+   - If `count < per_user_limit`, this is the winner (`P` = its dollar value); stop.
+   - Otherwise move to the next candidate.
 5. Persist `platform_discount_id` + `platform_discount_amount = P`; subtract `P` from
    the customer total. Cook payout / platform fee stay on pre-discount `S`.
 
 If no discount qualifies, `platform_discount_id`/`platform_discount_amount` stay null.
+
+### 4.1 Airtight per-user cap (advisory lock)
+
+The per-user count is a read-then-write that is not atomic on its own, so two
+concurrent checkouts by the **same user** could both pass `count < per_user_limit`
+and over-redeem. To prevent this, the count-and-apply for the chosen discount runs
+under a **transaction-scoped Postgres advisory lock**:
+
+```sql
+SELECT pg_advisory_xact_lock(hashtext('pd:' || :discountId || ':' || :clientId));
+-- then re-count and decide, all before COMMIT
+```
+
+- The lock key is derived only from `(discount_id, client_id)`, so it serializes
+  **only the same user's concurrent checkouts for the same discount** — no effect on
+  unrelated orders or overall throughput.
+- `pg_advisory_xact_lock` is **transaction-scoped**: it is released automatically on
+  `COMMIT`/`ROLLBACK`, so there is no risk of a leaked lock.
+- The second transaction blocks until the first commits, then reads an accurate count
+  and correctly sees the slot consumed. The cap is now exact.
+- Must run on a real transaction connection (the pooled/`dbPool` driver), not the
+  stateless HTTP driver, so the lock and the count share one session.
 
 ## 5. Admin UI (this repo)
 
@@ -169,14 +196,12 @@ Changes:
 - Checkout summary: add a "Platform discount −$X" line and automatically preview the
   best eligible discount for the current cart before the order is placed.
 
-## 8. Known limitations (v1, accepted)
+## 8. Concurrency & known limitations
 
-- **Per-user count concurrency race:** the count-then-insert is not atomic, so a user
-  submitting multiple orders in the same instant (double-click, two tabs, retry) can
-  exceed the per-user limit by ~1. Every such order is real and paid; impact is a tiny
-  promo-budget over-spend, not a security issue. **Future mitigation:** a Postgres
-  advisory lock keyed on `(discount_id, user_id)` at the top of the placement
-  transaction to serialize a single user's concurrent checkouts.
+- **Per-user count concurrency race — SOLVED.** The count-and-apply for the chosen
+  discount runs under a transaction-scoped advisory lock keyed on
+  `(discount_id, client_id)` (see §4.1), so the per-user cap is enforced exactly even
+  under simultaneous checkouts by the same user. This is a required part of v1.
 - **Cancelled orders free a redemption slot** (a user can cancel and re-redeem). Minor,
   accepted for v1.
 
