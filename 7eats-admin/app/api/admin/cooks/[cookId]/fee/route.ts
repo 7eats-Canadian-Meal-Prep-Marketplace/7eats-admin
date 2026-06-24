@@ -8,7 +8,14 @@ import { cookAgreements } from "@/db/schema/payments";
 import { auth } from "@/lib/auth";
 
 const schema = z.object({
-  platformFeePct: z.number().min(0.01).max(100),
+  platformFeePct: z
+    .number()
+    .min(0.5, "Fee must be at least 0.5%")
+    .max(7.5, "Fee cannot exceed 7.5%")
+    .refine(
+      (n) => Math.abs(n * 100 - Math.round(n * 100)) < 1e-9,
+      "Fee can have at most 2 decimal places",
+    ),
   notes: z.string().optional(),
 });
 
