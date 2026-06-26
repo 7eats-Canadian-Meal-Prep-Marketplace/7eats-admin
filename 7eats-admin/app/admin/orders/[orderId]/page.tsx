@@ -46,11 +46,13 @@ export default async function OrderDetailPage({
     .from(authUser)
     .where(eq(authUser.id, order.clientId))
     .limit(1);
-  const [listing] = await db
-    .select()
-    .from(listings)
-    .where(eq(listings.id, order.listingId))
-    .limit(1);
+  const [listing] = order.listingId
+    ? await db
+        .select()
+        .from(listings)
+        .where(eq(listings.id, order.listingId))
+        .limit(1)
+    : [];
   const [payment] = await db
     .select()
     .from(orderPayments)

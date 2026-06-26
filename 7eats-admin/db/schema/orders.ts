@@ -4,6 +4,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   numeric,
   pgPolicy,
   pgTable,
@@ -31,16 +32,16 @@ export const orders = pgTable(
     clientId: text("client_id")
       .notNull()
       .references(() => authUser.id, { onDelete: "restrict" }),
-    listingId: uuid("listing_id")
-      .notNull()
-      .references(() => listings.id, { onDelete: "restrict" }),
+    listingId: uuid("listing_id").references(() => listings.id, {
+      onDelete: "restrict",
+    }),
     cookId: uuid("cook_id")
       .notNull()
       .references(() => cookProfiles.id, { onDelete: "restrict" }),
     status: orderStatus("status").notNull().default("pending"),
-    quantity: integer("quantity").notNull().default(1),
+    quantity: integer("quantity"),
     // Price of one listing unit at time of order — immutable after insert
-    unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+    unitPrice: numeric("unit_price", { precision: 10, scale: 2 }),
     // Promotion applied at time of order (null = no promotion)
     promotionId: uuid("promotion_id").references(() => listingPromotions.id, {
       onDelete: "set null",
@@ -59,7 +60,7 @@ export const orders = pgTable(
     // total_price = unit_price * quantity - COALESCE(discount_amount, 0)
     totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("CAD"),
-    pickupAt: timestamp("pickup_at").notNull(),
+    pickupAt: timestamp("pickup_at"),
     fulfilledAt: timestamp("fulfilled_at"),
     cancelledAt: timestamp("cancelled_at"),
     cancelledBy: text("cancelled_by").references(() => authUser.id, {
@@ -93,6 +94,28 @@ export const orders = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
+    pickupCode: text("pickup_code"),
+    depositEnabled: boolean("deposit_enabled").notNull().default(false),
+    depositType: lateCancelFeeTypeEnum("deposit_type"),
+    depositValue: numeric("deposit_value", { precision: 10, scale: 2 }),
+    depositAmount: numeric("deposit_amount", { precision: 10, scale: 2 }),
+    deliveryAddress: jsonb("delivery_address"),
+    fulfillmentMode: varchar("fulfillment_mode", { length: 20 }),
+    deliveryFeeSnapshot: numeric("delivery_fee_snapshot", {
+      precision: 8,
+      scale: 2,
+    }),
+    deliveryDistanceKm: integer("delivery_distance_km"),
+    cancellationAllowed: boolean("cancellation_allowed")
+      .notNull()
+      .default(false),
+    confirmationCode: varchar("confirmation_code", { length: 16 }),
+    guestAccessTokenHash: text("guest_access_token_hash"),
+    isGuestCheckout: boolean("is_guest_checkout").notNull().default(false),
+    taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }),
+    taxProvince: varchar("tax_province", { length: 2 }),
+    fulfillmentWindowStart: timestamp("fulfillment_window_start"),
+    fulfillmentWindowEnd: timestamp("fulfillment_window_end"),
   },
   (t) => [
     uniqueIndex("orders_subscription_period_uidx").on(
@@ -202,6 +225,13 @@ export const orderDishes = pgTable(
     dishName: varchar("dish_name", { length: 255 }).notNull(),
     quantity: integer("quantity").notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
+    priceSnapshot: numeric("price_snapshot", { precision: 10, scale: 2 })
+      .notNull(),
+    promotionId: uuid("promotion_id").references(() => listingPromotions.id, {
+      onDelete: "set null",
+    }),
+    discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }),
+    lineTotal: numeric("line_total", { precision: 10, scale: 2 }).notNull(),
   },
   (t) => [
     // A dish can only appear once per order snapshot
@@ -252,9 +282,9 @@ export const reviews = pgTable(
     cookId: uuid("cook_id")
       .notNull()
       .references(() => cookProfiles.id, { onDelete: "restrict" }),
-    listingId: uuid("listing_id")
-      .notNull()
-      .references(() => listings.id, { onDelete: "restrict" }),
+    listingId: uuid("listing_id").references(() => listings.id, {
+      onDelete: "restrict",
+    }),
     rating: integer("rating").notNull(),
     comment: text("comment"),
     cookResponse: text("cook_response"),

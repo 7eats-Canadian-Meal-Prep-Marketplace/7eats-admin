@@ -8,7 +8,7 @@ import { formatDate } from "@/lib/format";
 type Order = {
   id: string;
   totalPrice: string;
-  quantity: number;
+  quantity: number | null;
   status: string;
   pickupAt: Date | null;
   createdAt: Date | null;
@@ -129,7 +129,7 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
                   </td>
                   <td>{o.cookDisplayName ?? "—"}</td>
                   <td className="table-cell-muted">{o.clientEmail ?? "—"}</td>
-                  <td className="table-cell-muted">{o.quantity}</td>
+                  <td className="table-cell-muted">{o.quantity ?? "—"}</td>
                   <td style={{ fontWeight: 500 }}>{fmtMoney(o.totalPrice)}</td>
                   <td>
                     <span className={`badge badge-${o.status}`}>

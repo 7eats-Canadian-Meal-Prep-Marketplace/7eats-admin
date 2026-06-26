@@ -341,7 +341,6 @@ function ProfileTab({ cook, user }: { cook: Cook; user: User | null }) {
     { label: "Bio", value: cook.bio },
     { label: "Pickup Address", value: cook.pickupAddress },
     { label: "Lead Time", value: cook.leadTime },
-    { label: "Max Capacity", value: cook.maxCapacity?.toString() },
     { label: "Delivery", value: cook.delivery },
     { label: "Platform Fee %", value: `${cook.platformFeePct ?? "7.5"}%` },
     { label: "Stripe Account", value: cook.stripeAccountId },

@@ -73,12 +73,13 @@ export const dishes = pgTable(
     servingSize: varchar("serving_size", { length: 100 }),
     // Workflow status — public visibility is derived from listing membership,
     // not from this field.
-    status: dishStatus("status").notNull().default("draft"),
+    status: dishStatus("status").notNull().default("active"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
+    price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   },
   () => [
     // Public: dish appears in at least one active listing
@@ -174,7 +175,6 @@ export const dishIngredients = pgTable(
       .notNull()
       .references(() => dishes.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 255 }).notNull(),
-    quantity: varchar("quantity", { length: 100 }),
     isAllergen: boolean("is_allergen").notNull().default(false),
     sortOrder: integer("sort_order").notNull().default(0),
   },

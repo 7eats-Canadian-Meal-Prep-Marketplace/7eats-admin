@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  date,
+  jsonb,
   pgPolicy,
   pgTable,
   text,
@@ -30,6 +32,11 @@ export const authUser = pgTable(
     phone: varchar("phone", { length: 20 }),
     phoneVerified: boolean("phone_verified").notNull().default(false),
     stripeCustomerId: text("stripe_customer_id"),
+    onboardingCompletedAt: timestamp("onboarding_completed_at"),
+    dateOfBirth: date("date_of_birth"),
+    neighborhood: varchar("neighborhood", { length: 100 }),
+    notificationPreferences: jsonb("notification_preferences"),
+    isGuestAccount: boolean("is_guest_account").notNull().default(false),
   },
   () => [
     // Public read required: other tables' RLS policies JOIN this table to check

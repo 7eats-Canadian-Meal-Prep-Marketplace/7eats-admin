@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  doublePrecision,
   integer,
   numeric,
   pgPolicy,
@@ -42,7 +43,6 @@ export const cookProfiles = pgTable(
     setupComplete: boolean("setup_complete").notNull().default(false),
     pickupAddress: text("pickup_address"),
     leadTime: leadTimeEnum("lead_time"),
-    maxCapacity: integer("max_capacity"),
     delivery: deliveryEnum("delivery"),
     acceptsSpecialRequests: boolean("accepts_special_requests")
       .notNull()
@@ -82,6 +82,32 @@ export const cookProfiles = pgTable(
     smsNotificationsNewOrder: boolean("sms_notifications_new_order")
       .notNull()
       .default(false),
+    pickupStreet: text("pickup_street"),
+    pickupUnit: text("pickup_unit"),
+    pickupCity: text("pickup_city"),
+    pickupProvince: text("pickup_province"),
+    pickupPostal: text("pickup_postal"),
+    pickupLat: doublePrecision("pickup_lat"),
+    pickupLng: doublePrecision("pickup_lng"),
+    pickupPlaceId: text("pickup_place_id"),
+    maxDeliveryKm: integer("max_delivery_km"),
+    deliveryRatePerKm: numeric("delivery_rate_per_km", {
+      precision: 6,
+      scale: 2,
+    }),
+    deliveryFlatFee: numeric("delivery_flat_fee", { precision: 6, scale: 2 })
+      .default("0"),
+    freeDeliveryAbove: numeric("free_delivery_above", {
+      precision: 8,
+      scale: 2,
+    }),
+    minOrderQty: integer("min_order_qty").notNull().default(1),
+    maxOrderQty: integer("max_order_qty"),
+    cancellationAllowed: boolean("cancellation_allowed")
+      .notNull()
+      .default(false),
+    bannerUrl: text("banner_url"),
+    offersPickup: boolean("offers_pickup").notNull().default(true),
   },
   (t) => [
     check(

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  doublePrecision,
   pgPolicy,
   pgTable,
   text,
@@ -39,6 +40,9 @@ export const cookApplications = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
+    addressLat: doublePrecision("address_lat"),
+    addressLng: doublePrecision("address_lng"),
+    addressPlaceId: text("address_place_id"),
   },
   (table) => [
     uniqueIndex("cook_applications_contact_email_idx").on(table.contactEmail),

@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { authUser } from "./auth";
 import { cookProfiles } from "./cooks";
-import { paymentStatus, payoutStatus } from "./enums";
+import { paymentStatus, paymentType, payoutStatus } from "./enums";
 import { orders } from "./orders";
 
 const isAdmin = sql`auth.role() = 'admin'`;
@@ -127,6 +127,7 @@ export const orderPayments = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
+    type: paymentType("type").notNull().default("full"),
   },
   (t) => [
     check("order_payments_total_amount_positive", sql`${t.totalAmount} > 0`),

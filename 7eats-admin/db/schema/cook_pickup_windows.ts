@@ -22,6 +22,7 @@ export const cookPickupWindows = pgTable(
     dayOfWeek: text("day_of_week").notNull(),
     fromTime: time("from_time", { precision: 0 }).notNull(),
     toTime: time("to_time", { precision: 0 }).notNull(),
+    windowType: text("window_type").notNull().default("pickup"),
   },
   (t) => [
     uniqueIndex("cpw_cook_day_uidx").on(t.cookId, t.dayOfWeek),

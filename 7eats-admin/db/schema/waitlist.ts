@@ -12,6 +12,7 @@ export const waitlist = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
+    city: text("city"),
   },
   () => [
     pgPolicy("waitlist_service_only", {

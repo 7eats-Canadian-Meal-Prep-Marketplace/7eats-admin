@@ -66,6 +66,12 @@ export const paymentStatus = pgEnum("payment_status", [
   "refunded",
   "disputed",
 ]);
+export const paymentType = pgEnum("payment_type", [
+  "full",
+  "deposit",
+  "balance",
+]);
+
 export const payoutStatus = pgEnum("payout_status", [
   "pending",
   "in_transit",
