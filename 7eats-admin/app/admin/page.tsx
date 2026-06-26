@@ -9,6 +9,7 @@ import { cookCertifications, cookProfiles } from "@/db/schema/cooks";
 import { listings } from "@/db/schema/listings";
 import { orders } from "@/db/schema/orders";
 import { orderPayments } from "@/db/schema/payments";
+import { formatDate } from "@/lib/format";
 import styles from "./dashboard.module.css";
 
 function startOfMonth() {
@@ -243,9 +244,7 @@ export default async function DashboardPage() {
                         </span>
                       </td>
                       <td className="table-cell-muted">
-                        {app.createdAt
-                          ? new Date(app.createdAt).toLocaleDateString("en-CA")
-                          : "—"}
+                        {app.createdAt ? formatDate(app.createdAt) : "—"}
                       </td>
                     </tr>
                   ))}
@@ -298,11 +297,7 @@ export default async function DashboardPage() {
                         </span>
                       </td>
                       <td className="table-cell-muted">
-                        {order.createdAt
-                          ? new Date(order.createdAt).toLocaleDateString(
-                              "en-CA",
-                            )
-                          : "—"}
+                        {order.createdAt ? formatDate(order.createdAt) : "—"}
                       </td>
                     </tr>
                   ))}

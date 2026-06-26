@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { authUser } from "@/db/schema/auth";
+import { formatDate } from "@/lib/format";
 
 type User = InferSelectModel<typeof authUser>;
 
@@ -149,7 +150,7 @@ export function UsersClient({ users }: { users: User[] }) {
                     {user.phoneVerified ? "✓" : "—"}
                   </td>
                   <td className="table-cell-muted">
-                    {new Date(user.createdAt).toLocaleDateString("en-CA")}
+                    {formatDate(user.createdAt)}
                   </td>
                 </tr>
               ))}

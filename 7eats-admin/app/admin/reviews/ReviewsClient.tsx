@@ -3,6 +3,7 @@ import { Eye, EyeOff, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type Review = {
   id: string;
@@ -137,9 +138,7 @@ export function ReviewsClient({ reviews }: { reviews: Review[] }) {
                     </span>
                   </td>
                   <td className="table-cell-muted">
-                    {r.createdAt
-                      ? new Date(r.createdAt).toLocaleDateString("en-CA")
-                      : "—"}
+                    {r.createdAt ? formatDate(r.createdAt) : "—"}
                   </td>
                   <td>
                     <button

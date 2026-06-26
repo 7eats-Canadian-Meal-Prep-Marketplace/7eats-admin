@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { discountStatus } from "@/lib/discounts/status";
+import { formatDate } from "@/lib/format";
 import { DiscountForm } from "./DiscountForm";
 import styles from "./discounts.module.css";
 
@@ -36,7 +37,7 @@ function formatValue(d: DiscountRow): string {
 function formatWindow(d: DiscountRow): string {
   const s = toDate(d.startsAt);
   const e = toDate(d.endsAt);
-  const fmt = (x: Date) => x.toLocaleDateString("en-CA");
+  const fmt = (x: Date) => formatDate(x);
   if (!s && !e) return "Always";
   if (s && e) return `${fmt(s)} – ${fmt(e)}`;
   if (s) return `From ${fmt(s)}`;

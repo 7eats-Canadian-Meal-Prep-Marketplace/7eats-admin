@@ -9,6 +9,7 @@ import type { cookCertifications, cookProfiles } from "@/db/schema/cooks";
 import type { listings } from "@/db/schema/listings";
 import type { orders } from "@/db/schema/orders";
 import type { cookAgreements, cookPayouts } from "@/db/schema/payments";
+import { formatDate } from "@/lib/format";
 
 type Cook = InferSelectModel<typeof cookProfiles>;
 type User = InferSelectModel<typeof authUser>;
@@ -347,9 +348,7 @@ function ProfileTab({ cook, user }: { cook: Cook; user: User | null }) {
     { label: "Setup Complete", value: cook.setupComplete ? "Yes" : "No" },
     {
       label: "TOS Accepted",
-      value: cook.tosAcceptedAt
-        ? new Date(cook.tosAcceptedAt).toLocaleDateString("en-CA")
-        : "No",
+      value: cook.tosAcceptedAt ? formatDate(cook.tosAcceptedAt) : "No",
     },
     { label: "User Email", value: user?.email },
     { label: "Account Status", value: user?.status },
@@ -441,9 +440,7 @@ function CertsTab({ certs }: { certs: Cert[]; cookId: string }) {
                 <td>{cert.holderName}</td>
                 <td className="table-cell-muted">{cert.issuer ?? "—"}</td>
                 <td className="table-cell-muted">
-                  {cert.expiresAt
-                    ? new Date(cert.expiresAt).toLocaleDateString("en-CA")
-                    : "—"}
+                  {cert.expiresAt ? formatDate(cert.expiresAt) : "—"}
                 </td>
                 <td>
                   <span className={`badge badge-${cert.status}`}>
@@ -520,9 +517,7 @@ function ListingsTab({ listings }: { listings: Listing[] }) {
                   </span>
                 </td>
                 <td className="table-cell-muted">
-                  {l.createdAt
-                    ? new Date(l.createdAt).toLocaleDateString("en-CA")
-                    : "—"}
+                  {l.createdAt ? formatDate(l.createdAt) : "—"}
                 </td>
               </tr>
             ))}
@@ -574,14 +569,10 @@ function OrdersTab({ orders }: { orders: Order[] }) {
                   <span className={`badge badge-${o.status}`}>{o.status}</span>
                 </td>
                 <td className="table-cell-muted">
-                  {o.pickupAt
-                    ? new Date(o.pickupAt).toLocaleDateString("en-CA")
-                    : "—"}
+                  {o.pickupAt ? formatDate(o.pickupAt) : "—"}
                 </td>
                 <td className="table-cell-muted">
-                  {o.createdAt
-                    ? new Date(o.createdAt).toLocaleDateString("en-CA")
-                    : "—"}
+                  {o.createdAt ? formatDate(o.createdAt) : "—"}
                 </td>
               </tr>
             ))}
@@ -620,14 +611,10 @@ function PayoutsTab({ payouts }: { payouts: Payout[] }) {
                   <span className={`badge badge-${p.status}`}>{p.status}</span>
                 </td>
                 <td className="table-cell-muted">
-                  {p.arrivalDate
-                    ? new Date(p.arrivalDate).toLocaleDateString("en-CA")
-                    : "—"}
+                  {p.arrivalDate ? formatDate(p.arrivalDate) : "—"}
                 </td>
                 <td className="table-cell-muted">
-                  {p.createdAt
-                    ? new Date(p.createdAt).toLocaleDateString("en-CA")
-                    : "—"}
+                  {p.createdAt ? formatDate(p.createdAt) : "—"}
                 </td>
               </tr>
             ))}
@@ -663,14 +650,10 @@ function FeeHistoryTab({ agreements }: { agreements: Agreement[] }) {
               <tr key={a.id}>
                 <td style={{ fontWeight: 500 }}>{a.platformFeePct}%</td>
                 <td className="table-cell-muted">
-                  {a.effectiveFrom
-                    ? new Date(a.effectiveFrom).toLocaleDateString("en-CA")
-                    : "—"}
+                  {a.effectiveFrom ? formatDate(a.effectiveFrom) : "—"}
                 </td>
                 <td className="table-cell-muted">
-                  {a.effectiveUntil
-                    ? new Date(a.effectiveUntil).toLocaleDateString("en-CA")
-                    : "Current"}
+                  {a.effectiveUntil ? formatDate(a.effectiveUntil) : "Current"}
                 </td>
                 <td className="table-cell-muted">{a.notes ?? "—"}</td>
               </tr>

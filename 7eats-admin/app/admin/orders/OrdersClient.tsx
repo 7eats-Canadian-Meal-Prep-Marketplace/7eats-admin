@@ -1,7 +1,9 @@
 "use client";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { formatDate } from "@/lib/format";
 
 type Order = {
   id: string;
@@ -34,6 +36,7 @@ function fmtMoney(n: string) {
 }
 
 export function OrdersClient({ orders }: { orders: Order[] }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
@@ -106,10 +109,15 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
             </thead>
             <tbody>
               {filtered.map((o) => (
-                <tr key={o.id} className="is-clickable">
+                <tr
+                  key={o.id}
+                  className="is-clickable"
+                  onClick={() => router.push(`/admin/orders/${o.id}`)}
+                >
                   <td>
                     <Link
                       href={`/admin/orders/${o.id}`}
+                      onClick={(e) => e.stopPropagation()}
                       style={{
                         fontWeight: 600,
                         color: "var(--ink)",
@@ -129,14 +137,10 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
                     </span>
                   </td>
                   <td className="table-cell-muted">
-                    {o.pickupAt
-                      ? new Date(o.pickupAt).toLocaleDateString("en-CA")
-                      : "—"}
+                    {o.pickupAt ? formatDate(o.pickupAt) : "—"}
                   </td>
                   <td className="table-cell-muted">
-                    {o.createdAt
-                      ? new Date(o.createdAt).toLocaleDateString("en-CA")
-                      : "—"}
+                    {o.createdAt ? formatDate(o.createdAt) : "—"}
                   </td>
                 </tr>
               ))}

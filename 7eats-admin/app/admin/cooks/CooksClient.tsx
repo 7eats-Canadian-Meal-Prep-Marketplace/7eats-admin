@@ -1,7 +1,9 @@
 "use client";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { formatDate } from "@/lib/format";
 
 type Cook = {
   id: string;
@@ -27,6 +29,7 @@ const STATUS_FILTERS = [
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 export function CooksClient({ cooks }: { cooks: Cook[] }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
@@ -97,10 +100,15 @@ export function CooksClient({ cooks }: { cooks: Cook[] }) {
             </thead>
             <tbody>
               {filtered.map((cook) => (
-                <tr key={cook.id} className="is-clickable">
+                <tr
+                  key={cook.id}
+                  className="is-clickable"
+                  onClick={() => router.push(`/admin/cooks/${cook.id}`)}
+                >
                   <td>
                     <Link
                       href={`/admin/cooks/${cook.id}`}
+                      onClick={(e) => e.stopPropagation()}
                       style={{
                         fontWeight: 600,
                         color: "var(--ink)",
@@ -131,9 +139,7 @@ export function CooksClient({ cooks }: { cooks: Cook[] }) {
                     </span>
                   </td>
                   <td className="table-cell-muted">
-                    {cook.createdAt
-                      ? new Date(cook.createdAt).toLocaleDateString("en-CA")
-                      : "—"}
+                    {cook.createdAt ? formatDate(cook.createdAt) : "—"}
                   </td>
                 </tr>
               ))}

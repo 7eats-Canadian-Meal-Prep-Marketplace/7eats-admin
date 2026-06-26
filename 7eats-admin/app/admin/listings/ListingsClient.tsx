@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Modal } from "@/app/admin/Modal";
+import { formatDate } from "@/lib/format";
 
 type Listing = {
   id: string;
@@ -159,9 +160,7 @@ export function ListingsClient({ listings }: { listings: Listing[] }) {
                       </span>
                     </td>
                     <td className="table-cell-muted">
-                      {l.createdAt
-                        ? new Date(l.createdAt).toLocaleDateString("en-CA")
-                        : "—"}
+                      {l.createdAt ? formatDate(l.createdAt) : "—"}
                     </td>
                     <td>
                       {l.status === "pending_review" && (
