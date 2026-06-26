@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatMonthDay } from "@/lib/format";
 import styles from "./analytics.module.css";
 
 const CHART_COLORS = [
@@ -57,19 +58,13 @@ export function AnalyticsCharts({
   payoutTotals,
 }: Props) {
   const ordersData = ordersByDay.map((d) => ({
-    day: new Date(d.day).toLocaleDateString("en-CA", {
-      month: "short",
-      day: "numeric",
-    }),
+    day: formatMonthDay(d.day),
     Orders: Number(d.order_count),
     Revenue: Number(d.revenue),
   }));
 
   const revenueData = revenueByWeek.map((d) => ({
-    week: new Date(d.week_start).toLocaleDateString("en-CA", {
-      month: "short",
-      day: "numeric",
-    }),
+    week: formatMonthDay(d.week_start),
     "Gross Volume": Number(d.gross_volume),
     "Platform Fees": Number(d.platform_fees),
   }));

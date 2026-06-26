@@ -10,6 +10,7 @@ import { cookProfiles } from "@/db/schema/cooks";
 import { listings } from "@/db/schema/listings";
 import { orderDishes, orders, reviews } from "@/db/schema/orders";
 import { orderPayments } from "@/db/schema/payments";
+import { formatDateTime } from "@/lib/format";
 
 export const metadata = { title: "Order Detail" };
 
@@ -76,9 +77,7 @@ export default async function OrderDetailPage({
         <div>
           <h1 className="page-title">Order #{order.id.slice(0, 8)}</h1>
           <p className="page-subtitle">
-            {order.createdAt
-              ? new Date(order.createdAt).toLocaleString("en-CA")
-              : "—"}
+            {order.createdAt ? formatDateTime(order.createdAt) : "—"}
           </p>
         </div>
         <span
@@ -144,17 +143,13 @@ export default async function OrderDetailPage({
               <div className="detail-field">
                 <span className="detail-field-label">Pickup At</span>
                 <span className="detail-field-value">
-                  {order.pickupAt
-                    ? new Date(order.pickupAt).toLocaleString("en-CA")
-                    : "—"}
+                  {order.pickupAt ? formatDateTime(order.pickupAt) : "—"}
                 </span>
               </div>
               <div className="detail-field">
                 <span className="detail-field-label">Fulfilled At</span>
                 <span className="detail-field-value">
-                  {order.fulfilledAt
-                    ? new Date(order.fulfilledAt).toLocaleString("en-CA")
-                    : "—"}
+                  {order.fulfilledAt ? formatDateTime(order.fulfilledAt) : "—"}
                 </span>
               </div>
               <div className="detail-field">

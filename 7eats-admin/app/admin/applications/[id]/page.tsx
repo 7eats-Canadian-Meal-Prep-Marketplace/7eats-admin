@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { cookApplications } from "@/db/schema/applications";
+import { formatDateTime } from "@/lib/format";
 import { ApplicationActions } from "./ApplicationActions";
 import styles from "./application-detail.module.css";
 
@@ -109,19 +110,11 @@ export default async function ApplicationDetailPage({
               <Field label="Status" value={app.status} />
               <Field
                 label="Submitted"
-                value={
-                  app.createdAt
-                    ? new Date(app.createdAt).toLocaleString("en-CA")
-                    : "—"
-                }
+                value={app.createdAt ? formatDateTime(app.createdAt) : "—"}
               />
               <Field
                 label="Last Updated"
-                value={
-                  app.updatedAt
-                    ? new Date(app.updatedAt).toLocaleString("en-CA")
-                    : "—"
-                }
+                value={app.updatedAt ? formatDateTime(app.updatedAt) : "—"}
               />
             </div>
           </div>

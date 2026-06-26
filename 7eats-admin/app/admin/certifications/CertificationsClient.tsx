@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Modal } from "@/app/admin/Modal";
+import { formatDate } from "@/lib/format";
 
 type Cert = {
   id: string;
@@ -159,9 +160,7 @@ export function CertificationsClient({
                     <td className="table-cell-muted">{cert.holderName}</td>
                     <td className="table-cell-muted">{cert.issuer ?? "—"}</td>
                     <td className="table-cell-muted">
-                      {cert.expiresAt
-                        ? new Date(cert.expiresAt).toLocaleDateString("en-CA")
-                        : "—"}
+                      {cert.expiresAt ? formatDate(cert.expiresAt) : "—"}
                     </td>
                     <td>
                       {cert.fileUrl ? (

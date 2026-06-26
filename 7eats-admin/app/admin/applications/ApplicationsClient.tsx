@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { cookApplications } from "@/db/schema/applications";
+import { formatDate } from "@/lib/format";
 
 type Application = InferSelectModel<typeof cookApplications>;
 
@@ -121,9 +122,7 @@ export function ApplicationsClient({
                     <td className="table-cell-muted">{app.contactEmail}</td>
                     <td className="table-cell-muted">{app.city}</td>
                     <td className="table-cell-muted">
-                      {app.createdAt
-                        ? new Date(app.createdAt).toLocaleDateString("en-CA")
-                        : "—"}
+                      {app.createdAt ? formatDate(app.createdAt) : "—"}
                     </td>
                     <td>
                       <span className={`badge badge-${app.status}`}>

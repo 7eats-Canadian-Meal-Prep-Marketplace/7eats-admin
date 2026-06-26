@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { authUser } from "@/db/schema/auth";
 import { cookProfiles } from "@/db/schema/cooks";
 import { orders } from "@/db/schema/orders";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { UserActions } from "./UserActions";
 
 export const metadata = { title: "User Detail" };
@@ -84,7 +85,7 @@ export default async function UserDetailPage({
                 },
                 {
                   label: "Joined",
-                  value: new Date(user.createdAt).toLocaleString("en-CA"),
+                  value: formatDateTime(user.createdAt),
                 },
               ].map((f) => (
                 <div key={f.label} className="detail-field">
@@ -188,14 +189,10 @@ export default async function UserDetailPage({
                         </span>
                       </td>
                       <td className="table-cell-muted">
-                        {o.pickupAt
-                          ? new Date(o.pickupAt).toLocaleDateString("en-CA")
-                          : "—"}
+                        {o.pickupAt ? formatDate(o.pickupAt) : "—"}
                       </td>
                       <td className="table-cell-muted">
-                        {o.createdAt
-                          ? new Date(o.createdAt).toLocaleDateString("en-CA")
-                          : "—"}
+                        {o.createdAt ? formatDate(o.createdAt) : "—"}
                       </td>
                     </tr>
                   ))}
