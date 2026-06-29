@@ -1,11 +1,18 @@
 import { Resend } from "resend";
-import { htmlEmail, paragraph } from "./emails/base";
+import {
+  type EmailSenderProfile,
+  formatEmailFrom,
+  htmlEmail,
+  paragraph,
+} from "./emails/base";
 
 export interface MailMessage {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  /** Inbox sender label. Default `noreply`; use `team` for human onboarding mail. */
+  sender?: EmailSenderProfile;
 }
 
 export async function sendMail({
@@ -13,13 +20,14 @@ export async function sendMail({
   subject,
   text,
   html,
+  sender = "noreply",
 }: MailMessage): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
 
   const resend = new Resend(apiKey);
   const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "noreply@7eats.ca",
+    from: formatEmailFrom(sender),
     to,
     subject,
     text,
@@ -70,5 +78,6 @@ export async function sendSetupEmail(
       "The 7eats team",
     ].join("\n"),
     html,
+    sender: "team",
   });
 }

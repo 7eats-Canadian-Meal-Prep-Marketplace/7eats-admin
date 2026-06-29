@@ -71,6 +71,7 @@ export async function POST(
       "",
       "— The 7eats team",
     ].join("\n"),
+    sender: "team",
   });
 
   return NextResponse.json({ ok: true });

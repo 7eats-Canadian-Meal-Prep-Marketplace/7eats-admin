@@ -34,6 +34,39 @@ const COLOR = {
 
 export const CONTACT_EMAIL = "contact@7eats.ca";
 export const NOREPLY_FROM = "noreply@7eats.ca";
+export const TEAM_FROM = "team@7eats.ca";
+
+/**
+ * Resend From header profiles. Each profile pairs a human-friendly display
+ * name with its own mailbox so inboxes show a recognizable sender, e.g.
+ * `7eats NoReply <noreply@7eats.ca>`, never a bare address.
+ */
+export type EmailSenderProfile = "noreply" | "team";
+
+const SENDER_PROFILES: Record<
+  EmailSenderProfile,
+  { name: string; email: string }
+> = {
+  noreply: { name: "7eats NoReply", email: NOREPLY_FROM },
+  team: { name: "7eats Team", email: TEAM_FROM },
+};
+
+/**
+ * Builds a Resend-compatible From value, e.g. `7eats NoReply
+ * <noreply@7eats.ca>`. RESEND_FROM_EMAIL overrides the no-reply mailbox only
+ * (the deployment's sending domain). The team profile always sends from its
+ * monitored mailbox so replies reach a person.
+ */
+export function formatEmailFrom(
+  profile: EmailSenderProfile = "noreply",
+): string {
+  const { name, email } = SENDER_PROFILES[profile];
+  const mailbox =
+    profile === "noreply"
+      ? process.env.RESEND_FROM_EMAIL?.trim() || email
+      : email;
+  return `${name} <${mailbox}>`;
+}
 
 // The brand wordmark, served as a PNG (email clients don't render SVG). Built
 // from public/7eats-logo.svg via scripts/make-email-logo.mjs; intrinsic 113x64.
@@ -104,9 +137,9 @@ export function htmlEmail({
 </table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 0;">
 <tr>
-<td style="padding:14px 16px;background-color:${COLOR.grey100};border-radius:12px;">
-<p style="margin:0 0 6px;font-family:${FONT_STACK};font-size:12px;line-height:1.5;color:${COLOR.grey500};">Button not working? Paste this link into your browser:</p>
-<a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="font-family:${FONT_STACK};font-size:12px;line-height:1.5;color:${COLOR.red};word-break:break-all;text-decoration:none;">${ctaUrl}</a>
+<td style="padding:16px 18px;background-color:${COLOR.white};border:1px solid ${COLOR.grey200};border-left:3px solid ${COLOR.red};border-radius:12px;">
+<p style="margin:0 0 8px;font-family:${FONT_STACK};font-size:12px;line-height:1.5;color:${COLOR.grey700};">Button not working? Paste this link into your browser:</p>
+<a href="${ctaUrl}" target="_blank" rel="noopener noreferrer" style="font-family:${FONT_STACK};font-size:12px;line-height:1.55;color:${COLOR.red};word-break:break-all;text-decoration:underline;text-underline-offset:2px;">${ctaUrl}</a>
 </td>
 </tr>
 </table>`
