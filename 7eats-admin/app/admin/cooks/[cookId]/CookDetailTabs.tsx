@@ -57,7 +57,7 @@ export function CookDetailTabs({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("Profile");
   const [modal, setModal] = useState<
-    "suspend" | "ban" | "reactivate" | "fee" | null
+    "remove" | "reactivate" | "fee" | null
   >(null);
   const [feeValue, setFeeValue] = useState(
     String(cook.platformFeePct ?? "7.5"),
@@ -71,7 +71,7 @@ export function CookDetailTabs({
     setError("");
   }
 
-  async function handleStatusChange(status: "active" | "suspended" | "banned") {
+  async function handleStatusChange(status: "active" | "banned") {
     setLoading(true);
     setError("");
     const res = await fetch(`/api/admin/cooks/${cook.id}/status`, {
@@ -130,22 +130,13 @@ export function CookDetailTabs({
       <div
         style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}
       >
-        {status !== "suspended" && status !== "banned" && (
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => setModal("suspend")}
-          >
-            Suspend Account
-          </button>
-        )}
         {status !== "banned" && (
           <button
             type="button"
             className="btn btn-danger btn-sm"
-            onClick={() => setModal("ban")}
+            onClick={() => setModal("remove")}
           >
-            Ban Account
+            Remove Account
           </button>
         )}
         {(status === "suspended" || status === "banned") && (
@@ -196,14 +187,10 @@ export function CookDetailTabs({
       </div>
 
       {/* Status modals */}
-      {(modal === "suspend" || modal === "ban" || modal === "reactivate") && (
+      {(modal === "remove" || modal === "reactivate") && (
         <Modal
           title={
-            modal === "suspend"
-              ? "Suspend Account"
-              : modal === "ban"
-                ? "Ban Account"
-                : "Reactivate Account"
+            modal === "remove" ? "Remove Account" : "Reactivate Account"
           }
           onClose={closeModal}
           footer={
@@ -220,31 +207,23 @@ export function CookDetailTabs({
                 className={`btn ${modal === "reactivate" ? "btn-secondary" : "btn-danger"} ${loading ? "btn-loading" : ""}`}
                 onClick={() =>
                   handleStatusChange(
-                    modal === "suspend"
-                      ? "suspended"
-                      : modal === "ban"
-                        ? "banned"
-                        : "active",
+                    modal === "remove" ? "banned" : "active",
                   )
                 }
                 disabled={loading}
               >
                 {loading
                   ? "Updating…"
-                  : modal === "suspend"
-                    ? "Suspend"
-                    : modal === "ban"
-                      ? "Ban"
-                      : "Reactivate"}
+                  : modal === "remove"
+                    ? "Remove"
+                    : "Reactivate"}
               </button>
             </>
           }
         >
           <p style={{ fontSize: 14, color: "var(--grey-700)" }}>
-            {modal === "suspend" &&
-              `Suspend ${cook.displayName}'s account? They will lose access until reactivated.`}
-            {modal === "ban" &&
-              `Permanently ban ${cook.displayName}'s account? This action should be used with caution.`}
+            {modal === "remove" &&
+              `Remove ${cook.displayName}'s account? They will lose access until reactivated. This action should be used with caution.`}
             {modal === "reactivate" &&
               `Reactivate ${cook.displayName}'s account? They will regain full access.`}
           </p>

@@ -6,6 +6,7 @@ export const accountStatus = pgEnum("account_status", [
   "active",
   "suspended",
   "banned",
+  "deleted",
 ]);
 export const listingStatus = pgEnum("listing_status", [
   "draft",
