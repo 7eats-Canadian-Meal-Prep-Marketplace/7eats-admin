@@ -165,7 +165,7 @@ export function CertificationsClient({
                     <td>
                       {cert.fileUrl ? (
                         <a
-                          href={cert.fileUrl}
+                          href={`/api/admin/certifications/${cert.id}/file`}
                           target="_blank"
                           rel="noreferrer"
                           style={{
