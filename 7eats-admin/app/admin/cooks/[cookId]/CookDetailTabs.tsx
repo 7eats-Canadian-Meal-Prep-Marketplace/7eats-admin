@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Modal } from "@/app/admin/Modal";
 import type { authUser } from "@/db/schema/auth";
 import type { cookCertifications, cookProfiles } from "@/db/schema/cooks";
-import type { listings } from "@/db/schema/listings";
+import type { dishes } from "@/db/schema/dishes";
 import type { orders } from "@/db/schema/orders";
 import type { cookAgreements, cookPayouts } from "@/db/schema/payments";
 import { formatDate } from "@/lib/format";
@@ -14,7 +14,7 @@ import { formatDate } from "@/lib/format";
 type Cook = InferSelectModel<typeof cookProfiles>;
 type User = InferSelectModel<typeof authUser>;
 type Cert = InferSelectModel<typeof cookCertifications>;
-type Listing = InferSelectModel<typeof listings>;
+type Dish = InferSelectModel<typeof dishes>;
 type Order = InferSelectModel<typeof orders>;
 type Payout = InferSelectModel<typeof cookPayouts>;
 type Agreement = InferSelectModel<typeof cookAgreements>;
@@ -22,7 +22,7 @@ type Agreement = InferSelectModel<typeof cookAgreements>;
 const TABS = [
   "Profile",
   "Certifications",
-  "Listings",
+  "Dishes",
   "Orders",
   "Payouts",
   "Fee History",
@@ -41,7 +41,7 @@ export function CookDetailTabs({
   cook,
   user,
   certifications,
-  listings: cookListings,
+  dishes: cookDishes,
   orders: cookOrders,
   payouts,
   agreements,
@@ -49,16 +49,16 @@ export function CookDetailTabs({
   cook: Cook;
   user: User | null;
   certifications: Cert[];
-  listings: Listing[];
+  dishes: Dish[];
   orders: Order[];
   payouts: Payout[];
   agreements: Agreement[];
 }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("Profile");
-  const [modal, setModal] = useState<
-    "remove" | "reactivate" | "fee" | null
-  >(null);
+  const [modal, setModal] = useState<"remove" | "reactivate" | "fee" | null>(
+    null,
+  );
   const [feeValue, setFeeValue] = useState(
     String(cook.platformFeePct ?? "7.5"),
   );
@@ -178,7 +178,7 @@ export function CookDetailTabs({
         {activeTab === "Certifications" && (
           <CertsTab certs={certifications} cookId={cook.id} />
         )}
-        {activeTab === "Listings" && <ListingsTab listings={cookListings} />}
+        {activeTab === "Dishes" && <DishesTab dishes={cookDishes} />}
         {activeTab === "Orders" && <OrdersTab orders={cookOrders} />}
         {activeTab === "Payouts" && <PayoutsTab payouts={payouts} />}
         {activeTab === "Fee History" && (
@@ -189,9 +189,7 @@ export function CookDetailTabs({
       {/* Status modals */}
       {(modal === "remove" || modal === "reactivate") && (
         <Modal
-          title={
-            modal === "remove" ? "Remove Account" : "Reactivate Account"
-          }
+          title={modal === "remove" ? "Remove Account" : "Reactivate Account"}
           onClose={closeModal}
           footer={
             <>
@@ -206,9 +204,7 @@ export function CookDetailTabs({
                 type="button"
                 className={`btn ${modal === "reactivate" ? "btn-secondary" : "btn-danger"} ${loading ? "btn-loading" : ""}`}
                 onClick={() =>
-                  handleStatusChange(
-                    modal === "remove" ? "banned" : "active",
-                  )
+                  handleStatusChange(modal === "remove" ? "banned" : "active")
                 }
                 disabled={loading}
               >
@@ -460,11 +456,11 @@ function CertsTab({ certs }: { certs: Cert[]; cookId: string }) {
   );
 }
 
-function ListingsTab({ listings }: { listings: Listing[] }) {
-  if (listings.length === 0) {
+function DishesTab({ dishes }: { dishes: Dish[] }) {
+  if (dishes.length === 0) {
     return (
       <div className="empty-state">
-        <p className="empty-state-title">No listings</p>
+        <p className="empty-state-title">No dishes</p>
       </div>
     );
   }
@@ -474,28 +470,24 @@ function ListingsTab({ listings }: { listings: Listing[] }) {
         <table className="table">
           <thead>
             <tr>
-              <th>Title</th>
+              <th>Name</th>
               <th>Price</th>
-              <th>Min/Max Qty</th>
+              <th>Cuisine</th>
               <th>Status</th>
               <th>Created</th>
             </tr>
           </thead>
           <tbody>
-            {listings.map((l) => (
-              <tr key={l.id}>
-                <td style={{ fontWeight: 500 }}>{l.title}</td>
-                <td>{fmtMoney(l.basePrice)}</td>
-                <td className="table-cell-muted">
-                  {l.minOrderQty} / {l.maxOrderQty ?? "—"}
-                </td>
+            {dishes.map((d) => (
+              <tr key={d.id}>
+                <td style={{ fontWeight: 500 }}>{d.name}</td>
+                <td>{fmtMoney(d.price)}</td>
+                <td className="table-cell-muted">{d.cuisine ?? "—"}</td>
                 <td>
-                  <span className={`badge badge-${l.status}`}>
-                    {l.status.replace("_", " ")}
-                  </span>
+                  <span className={`badge badge-${d.status}`}>{d.status}</span>
                 </td>
                 <td className="table-cell-muted">
-                  {l.createdAt ? formatDate(l.createdAt) : "—"}
+                  {d.createdAt ? formatDate(d.createdAt) : "—"}
                 </td>
               </tr>
             ))}

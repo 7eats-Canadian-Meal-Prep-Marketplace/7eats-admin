@@ -4,13 +4,13 @@ import {
   ChefHat,
   FileText,
   LayoutDashboard,
-  List,
   LogOut,
   ShieldCheck,
   ShoppingBag,
   Star,
   Tag,
   Users,
+  UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/applications", label: "Applications", icon: FileText },
   { href: "/admin/cooks", label: "Cooks", icon: ChefHat },
   { href: "/admin/certifications", label: "Certifications", icon: ShieldCheck },
-  { href: "/admin/listings", label: "Listings", icon: List },
+  { href: "/admin/dishes", label: "Dishes", icon: UtensilsCrossed },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/discounts", label: "Discounts", icon: Tag },

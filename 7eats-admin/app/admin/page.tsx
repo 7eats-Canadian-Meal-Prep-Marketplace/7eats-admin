@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { cookApplications } from "@/db/schema/applications";
 import { authUser } from "@/db/schema/auth";
 import { cookCertifications, cookProfiles } from "@/db/schema/cooks";
-import { listings } from "@/db/schema/listings";
+import { dishes } from "@/db/schema/dishes";
 import { orders } from "@/db/schema/orders";
 import { orderPayments } from "@/db/schema/payments";
 import { formatDate } from "@/lib/format";
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
     [totalCooks],
     [pendingApps],
     [pendingCerts],
-    [pendingListings],
+    [activeDishes],
     [ordersThisMonth],
     [revenueThisMonth],
     [platformFees],
@@ -60,8 +60,8 @@ export default async function DashboardPage() {
       .where(eq(cookCertifications.status, "pending_review")),
     db
       .select({ count: count() })
-      .from(listings)
-      .where(eq(listings.status, "pending_review")),
+      .from(dishes)
+      .where(eq(dishes.status, "active")),
     db
       .select({ count: count() })
       .from(orders)
@@ -132,10 +132,10 @@ export default async function DashboardPage() {
       href: "/admin/certifications",
     },
     {
-      label: "Pending Listings",
-      value: fmt(pendingListings.count),
+      label: "Active Dishes",
+      value: fmt(activeDishes.count),
       color: "#ec4899",
-      href: "/admin/listings",
+      href: "/admin/dishes",
     },
   ];
 

@@ -7,7 +7,6 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { authUser } from "@/db/schema/auth";
 import { cookProfiles } from "@/db/schema/cooks";
-import { listings } from "@/db/schema/listings";
 import { orderDishes, orders, reviews } from "@/db/schema/orders";
 import { orderPayments } from "@/db/schema/payments";
 import { formatDateTime } from "@/lib/format";
@@ -46,13 +45,6 @@ export default async function OrderDetailPage({
     .from(authUser)
     .where(eq(authUser.id, order.clientId))
     .limit(1);
-  const [listing] = order.listingId
-    ? await db
-        .select()
-        .from(listings)
-        .where(eq(listings.id, order.listingId))
-        .limit(1)
-    : [];
   const [payment] = await db
     .select()
     .from(orderPayments)
@@ -110,22 +102,6 @@ export default async function OrderDetailPage({
                 </span>
               </div>
               <div className="detail-field">
-                <span className="detail-field-label">Listing</span>
-                <span className="detail-field-value">
-                  {listing?.title ?? "—"}
-                </span>
-              </div>
-              <div className="detail-field">
-                <span className="detail-field-label">Quantity</span>
-                <span className="detail-field-value">{order.quantity}</span>
-              </div>
-              <div className="detail-field">
-                <span className="detail-field-label">Unit Price</span>
-                <span className="detail-field-value">
-                  {fmtMoney(order.unitPrice)}
-                </span>
-              </div>
-              <div className="detail-field">
                 <span className="detail-field-label">Discount</span>
                 <span className="detail-field-value">
                   {order.discountAmount
@@ -180,6 +156,8 @@ export default async function OrderDetailPage({
                   <tr>
                     <th>Dish Name</th>
                     <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Line Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -187,6 +165,10 @@ export default async function OrderDetailPage({
                     <tr key={d.id}>
                       <td>{d.dishName}</td>
                       <td className="table-cell-muted">{d.quantity}</td>
+                      <td className="table-cell-muted">
+                        {fmtMoney(d.priceSnapshot)}
+                      </td>
+                      <td>{fmtMoney(d.lineTotal)}</td>
                     </tr>
                   ))}
                 </tbody>

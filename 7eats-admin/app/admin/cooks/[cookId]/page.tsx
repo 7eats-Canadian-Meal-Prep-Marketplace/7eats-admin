@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { authUser } from "@/db/schema/auth";
 import { cookCertifications, cookProfiles } from "@/db/schema/cooks";
-import { listings } from "@/db/schema/listings";
+import { dishes } from "@/db/schema/dishes";
 import { orders } from "@/db/schema/orders";
 import { cookAgreements, cookPayouts } from "@/db/schema/payments";
 import { CookDetailTabs } from "./CookDetailTabs";
@@ -35,7 +35,7 @@ export default async function CookDetailPage({
     .where(eq(authUser.id, cook.userId))
     .limit(1);
 
-  const [certs, cookListings, cookOrders, payouts, agreements] =
+  const [certs, cookDishes, cookOrders, payouts, agreements] =
     await Promise.all([
       db
         .select()
@@ -44,9 +44,9 @@ export default async function CookDetailPage({
         .orderBy(desc(cookCertifications.createdAt)),
       db
         .select()
-        .from(listings)
-        .where(eq(listings.cookId, cookId))
-        .orderBy(desc(listings.createdAt))
+        .from(dishes)
+        .where(eq(dishes.cookId, cookId))
+        .orderBy(desc(dishes.createdAt))
         .limit(50),
       db
         .select()
@@ -94,7 +94,7 @@ export default async function CookDetailPage({
         cook={cook}
         user={user ?? null}
         certifications={certs}
-        listings={cookListings}
+        dishes={cookDishes}
         orders={cookOrders}
         payouts={payouts}
         agreements={agreements}
