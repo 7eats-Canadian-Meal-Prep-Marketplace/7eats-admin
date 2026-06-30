@@ -18,6 +18,23 @@ function dateInputValue(v: string | Date | null | undefined): string {
   return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 16);
 }
 
+// Money: digits with an optional single decimal point and up to 2 decimals.
+const MONEY_RE = /^\d*\.?\d{0,2}$/;
+// Whole positive integers only.
+const INT_RE = /^\d*$/;
+
+// Returns an onChange handler that only commits values matching `re`,
+// so the field can never hold a non-numeric character.
+function filteredSetter(
+  re: RegExp,
+  setter: (v: string) => void,
+): (e: React.ChangeEvent<HTMLInputElement>) => void {
+  return (e) => {
+    const v = e.target.value;
+    if (v === "" || re.test(v)) setter(v);
+  };
+}
+
 export function DiscountForm({ onClose, onSaved, existing }: Props) {
   const [name, setName] = useState(existing?.name ?? "");
   const [description, setDescription] = useState(existing?.description ?? "");
@@ -41,6 +58,40 @@ export function DiscountForm({ onClose, onSaved, existing }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    const amount = Number.parseFloat(value as string);
+    if (!value || Number.isNaN(amount) || amount <= 0) {
+      toast.error(
+        discountType === "percentage"
+          ? "Enter a percent greater than 0"
+          : "Enter an amount greater than 0",
+      );
+      return;
+    }
+    if (discountType === "percentage" && amount > 100) {
+      toast.error("Percentage discount cannot exceed 100");
+      return;
+    }
+    if (discountType === "percentage" && maxDiscountAmount) {
+      const cap = Number.parseFloat(maxDiscountAmount as string);
+      if (Number.isNaN(cap) || cap <= 0) {
+        toast.error("Max discount cap must be greater than 0");
+        return;
+      }
+    }
+    if (minOrderSubtotal) {
+      const min = Number.parseFloat(minOrderSubtotal as string);
+      if (Number.isNaN(min) || min < 0) {
+        toast.error("Min order subtotal cannot be negative");
+        return;
+      }
+    }
+    const limit = Number.parseInt(perUserLimit, 10);
+    if (!perUserLimit || Number.isNaN(limit) || limit < 1) {
+      toast.error("Per-user limit must be at least 1");
+      return;
+    }
+
     setSaving(true);
     const payload = {
       name: name.trim(),
@@ -127,11 +178,11 @@ export function DiscountForm({ onClose, onSaved, existing }: Props) {
               {discountType === "percentage" ? "Percent" : "Amount ($)"}
             </span>
             <input
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="decimal"
+              placeholder={discountType === "percentage" ? "0" : "0.00"}
               value={value as string}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={filteredSetter(MONEY_RE, setValue)}
               required
             />
           </label>
@@ -140,11 +191,11 @@ export function DiscountForm({ onClose, onSaved, existing }: Props) {
           <label className={styles.field}>
             <span>Max discount cap ($, optional)</span>
             <input
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
               value={maxDiscountAmount as string}
-              onChange={(e) => setMaxDiscountAmount(e.target.value)}
+              onChange={filteredSetter(MONEY_RE, setMaxDiscountAmount)}
             />
           </label>
         )}
@@ -152,21 +203,21 @@ export function DiscountForm({ onClose, onSaved, existing }: Props) {
           <label className={styles.field}>
             <span>Min order subtotal ($, optional)</span>
             <input
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
               value={minOrderSubtotal as string}
-              onChange={(e) => setMinOrderSubtotal(e.target.value)}
+              onChange={filteredSetter(MONEY_RE, setMinOrderSubtotal)}
             />
           </label>
           <label className={styles.field}>
             <span>Per-user limit</span>
             <input
-              type="number"
-              min="1"
-              step="1"
+              type="text"
+              inputMode="numeric"
+              placeholder="1"
               value={perUserLimit}
-              onChange={(e) => setPerUserLimit(e.target.value)}
+              onChange={filteredSetter(INT_RE, setPerUserLimit)}
               required
             />
           </label>

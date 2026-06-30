@@ -57,7 +57,10 @@ export async function POST(request: NextRequest) {
       startsAt: d.startsAt ?? null,
       endsAt: d.endsAt ?? null,
       isActive: d.isActive,
-      createdBy: session.user.id,
+      // created_by FKs the main app's `user` table; admins live in `admin_user`
+      // (separate auth domain), so their id isn't a valid `user` reference.
+      // Leave null rather than violate the FK.
+      createdBy: null,
     })
     .returning({ id: platformDiscounts.id });
   return NextResponse.json({ id: created.id }, { status: 201 });
